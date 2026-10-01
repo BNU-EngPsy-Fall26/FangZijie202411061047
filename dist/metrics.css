@@ -1,0 +1,16 @@
+.metric-grid{grid-template-columns:repeat(6,1fr)}
+@media(max-width:900px){.metric-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.metric-grid{grid-template-columns:1fr}}
+
+/* Readability and whole-card task interaction */
+html{font-size:17px}
+body{font-size:1rem;line-height:1.55}
+.task-card{cursor:pointer}
+.task-card:focus-visible{outline:4px solid rgba(23,133,154,.28);outline-offset:4px;box-shadow:var(--shadow)}
+.task-enter{display:inline-block;padding:.6rem 0;color:var(--ink);font-weight:900}
+.task-enter span{color:var(--teal2);margin-left:.4rem}
+.eyebrow,.task-kicker,.level-tag,.range-labels,.metric-grid span,.metric-grid small,.panel-head>span,.user-chip div,.user-chip button,.instruction-rules span,.admin-stats span,th,td{font-size:max(.8rem,13px)}
+.difficulty-card>p,.login-foot{font-size:max(.82rem,13px)}
+.task-copy p,.concept-grid p,.module-copy>p:not(.eyebrow),.payoff-wrap>p,.theory-grid p{font-size:1rem}
+/* Keep the continuity-correction explanation adjacent to the displayed statistics. */
+.calculation-note{margin:1rem 0 1.5rem;color:#526b72;font-size:.86rem;line-height:1.7;max-width:1000px}
