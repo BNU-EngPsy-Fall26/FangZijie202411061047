@@ -35,11 +35,6 @@
 - `dist/pingpong.js`：独立发球任务、参数化动画、试次生成和结果整合
 - `dist/receiver.js`：接球方视角动画、遮挡与回抛参数、对应指导语
 - `dist/styles.css`、`lab.css`、`metrics.css`、`pingpong.css`：布局与样式
-- `作业要求核对.md`：对文件夹中两张作业要求图片的逐项核对
-
-## 提交
-
-将本项目代码和 README 提交到助教指定的课程 GitHub Organization 仓库。Sites 网站部署不能替代这一提交；当前未提供课程仓库地址，因此未执行课程仓库提交。
 
 ## 数据说明
 
