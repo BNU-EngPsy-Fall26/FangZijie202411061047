@@ -14,3 +14,13 @@ const missing=session('drive',2);missing.trials.forEach(t=>t.aoi={});assert.equa
 assert.throws(()=>normalize({hello:'world'}));assert.throws(()=>normalize([{...driving,trials:[{cond:0,correct:1,rt:'fake'}]}]));
 const bad=normalize([{...driving,mode:'demo'},{...driving,id:'missing-policy',collectionPolicy:undefined}]);assert.equal(bad.sessions.length,2);assert.notEqual(signature(bad.sessions[0]),signature(bad.sessions[1]));
 console.log('PASS participant-level statistics against known t/CI values; completeness, duplicates, version isolation, missing gaze, course JSON and demo exclusion');
+
+// New driving protocol must use the same instrument-only cells in both conditions.
+const modern=Array.from({length:5},(_,i)=>({...session('drive',i),protocol:'starparcel-v4-adaptive-2026-11-03'}));
+const modernResult=analyze(modern,signature(modern[0]));assert.equal(modernResult.results[0].n,5);assert.equal(modernResult.results[1].n,5);near(modernResult.results[0].mean,-22);
+// The real course GET response omits meta. Retain acquisition markers per trial.
+const rawNoMeta={experiment:'starparcel_drive_v4',participant:'TEST_OLD',condition:'quick',trials:[{cond:0,event:'panel',priority:'road',correct:1,rt:500,protocol:'starparcel-v4-adaptive-2026-11-03',tier:'quick',calibration_error:200,gaze_samples:10,courseEligible:false}]};
+const legacyCamera=normalize({records:[rawNoMeta]}).sessions[0];assert.equal(legacyCamera.mode,'camera-evidence');assert.equal(analyze([legacyCamera],signature(legacyCamera)).sessions.length,0);
+const explicitCamera=normalize({records:[{...rawNoMeta,trials:rawNoMeta.trials.map(t=>({...t,mode:'formal'}))}]}).sessions[0];assert.equal(explicitCamera.mode,'formal');
+const explicitDemo=normalize({records:[{...rawNoMeta,mode:'demo'}]}).sessions[0];assert.equal(explicitDemo.mode,'demo');
+console.log('PASS v4 instrument-only inference on both conditions and server-without-meta compatibility without promoting inferred records to formal samples');
