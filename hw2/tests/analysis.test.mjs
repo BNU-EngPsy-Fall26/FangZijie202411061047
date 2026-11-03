@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {paired,tP,tCritical,holm,normalize,analyze,signature,cells,selectSessions,contrasts} from '../dist/analysis.js';
+import {makeTrials} from '../dist/core.js';
+const near=(a,b,tol=1e-6)=>assert.ok(Math.abs(a-b)<tol,`${a} != ${b}`);
+near(tP(2.2281388519649385,10),.05);near(tCritical(4),2.7764451051977987);
+const p=paired([1,2,3,4,5]);near(p.mean,3);near(p.t,4.242640687119285);near(p.p,.0132355995636827);near(p.ci[0],1.036756838522439);near(p.dz,1.8973665961010275);
+assert.equal(paired([1,2,3,4]).p,null);assert.equal(paired([0,0,0,0,0]).p,null);assert.equal(paired([1,1,1,1,1]).dz,null);
+assert.deepEqual(holm([.01,.04,.03,null]),[.03,.06,.06,null]);
+function session(e,i){return {id:e+i,experiment:e,participant:'TEST'+i,tier:'full',protocol:e==='drive'?'starparcel-v3-flight-2026-11-02':'starparcel-v2-design-2026-11-02',mode:'formal',courseEligible:true,collectionPolicy:'test-only',created:'2026-11-02',trials:makeTrials(e,false,'full').map(t=>({...t,correct:1,invalid:0,rt:t.event==='oncoming'?null:500+(t.angle||0)*2-(t.cond===1?20+i:0),aoi:{road:t.priority==='road'?80:20,cargo_instrument:t.priority==='road'?20:80}}))};}
+for(const e of ['drive','map','rotate']){const s=Array.from({length:5},(_,i)=>session(e,i)),key=signature(s[0]);assert.equal(cells(s[0]).complete,true);const r=analyze(s,key);assert.equal(r.sessions.length,5);assert.equal(r.results.find(r=>['cue_rt','sector_rt','axis_rt'].includes(r.id)).n,5);assert.equal(analyze([...s,{...s[0],id:'dup',created:'2026-11-03'}],key).sessions.length,5);assert.equal(analyze(s.map(x=>({...x,mode:'demo'})),key).sessions.length,0);assert.equal(analyze(s.map(x=>({...x,protocol:'other'})),key).sessions.length,0);assert.equal(analyze(s.map(x=>({...x,trials:x.trials.slice(1)})),key).excluded.incomplete,e==='drive'?5:0);}
+const rot=session('rotate',1);near(contrasts.rotate[0].value(rot),2);near(contrasts.rotate[1].value(rot),-21);
+const driving=session('drive',0),nr=normalize({records:[{experiment:'starparcel_drive_v3',participant:driving.participant,condition:'full',meta:{record_class:'formal',course_eligible:true,protocol:driving.protocol,collection_policy:driving.collectionPolicy,session_id:driving.id},trials:driving.trials.map(t=>({...t,rt:t.rt===null?undefined:t.rt,rt_missing:t.rt===null,aoi:undefined,aoi_summary:JSON.stringify(t.aoi)}))}]}).sessions[0];assert.equal(signature(nr),signature(driving));assert.equal(nr.mode,'formal');assert.equal(cells(nr).complete,true);assert.ok(nr.trials.filter(t=>t.event==='oncoming').every(t=>t.rt===null));
+const missing=session('drive',2);missing.trials.forEach(t=>t.aoi={});assert.equal(analyze([missing],signature(missing)).results[2].n,0);
+assert.throws(()=>normalize({hello:'world'}));assert.throws(()=>normalize([{...driving,trials:[{cond:0,correct:1,rt:'fake'}]}]));
+const bad=normalize([{...driving,mode:'demo'},{...driving,id:'missing-policy',collectionPolicy:undefined}]);assert.equal(bad.sessions.length,2);assert.notEqual(signature(bad.sessions[0]),signature(bad.sessions[1]));
+console.log('PASS participant-level statistics against known t/CI values; completeness, duplicates, version isolation, missing gaze, course JSON and demo exclusion');

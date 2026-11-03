@@ -1,0 +1,10 @@
+{
+  "name": "starparcel-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node tests/core.test.mjs && node tests/upload-policy.test.mjs && node tests/calibration-metrics.test.mjs && node tests/analysis.test.mjs && node tests/paper-data.test.mjs && node tests/adaptive-upload.test.mjs"
+  }
+}

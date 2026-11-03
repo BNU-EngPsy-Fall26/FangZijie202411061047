@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2"><meta name="description" content="跟随兔兔宇航员，探索注意、方向与空间想象。三个可交互的三维心理学实验。">
+  <title>星际快递局 · 注意实验室</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='48'%3E🪐%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="header"><a class="brand" href="#home" aria-label="星际快递局首页"><span class="brand-icon">✳</span><span>星际快递局<small>STARPARCEL LAB</small></span></a><nav aria-label="主导航"><a href="#home" data-nav="home">探索任务</a><a href="#concepts" data-nav="concepts">概念手册</a><a href="#results" data-nav="results">我的观测</a><a href="#analysis" data-nav="analysis">研究分析</a></nav><button class="status-button" id="eye-open"><span class="status-dot"></span><span id="eye-status">连接眼动</span><span>↗</span></button></header>
+  <main id="app"></main>
+  <footer><span>✳ STARPARCEL LAB</span><span>把好奇心，送到更远的地方。</span><a href="#about">文献与实验说明 ↗</a></footer>
+  <dialog id="modal"><button class="close" aria-label="关闭弹窗">×</button><div id="modal-body"></div></dialog>
+  <div id="toast" role="status"></div>
+  <div id="calibration" hidden><div class="cal-note" id="cal-note"></div><button id="cal-point" aria-label="校准点">✦</button><button id="cal-cancel">退出校准</button></div>
+  <noscript>请启用 JavaScript 以体验三维场景和实验。</noscript>
+</body></html>

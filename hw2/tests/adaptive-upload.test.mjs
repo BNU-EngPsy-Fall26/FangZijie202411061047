@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {shouldEnhance} from '../dist/adaptive-policy.js';
+const signal={condition:1,event:'panel',elapsed:600,looked:false,shown:false,signalFresh:true};
+assert.equal(shouldEnhance(signal),true);assert.equal(shouldEnhance({...signal,event:'map'}),true);
+for(const patch of [{condition:0},{event:'road'},{event:'oncoming'},{elapsed:599},{looked:true},{shown:true},{signalFresh:false}])assert.equal(shouldEnhance({...signal,...patch}),false);
+const source=fs.readFileSync(new URL('../dist/app.js',import.meta.url),'utf8');
+assert.ok(!source.includes('<option value="demo">'));
+assert.ok(source.includes('完成后将匿名编号、行为与眼动摘要自动上传'));
+const chunk=source.slice(source.indexOf('const uploadBusy=new Set();'),source.indexOf('function confirmUpload(s){'));
+const data=new Map(),state={textContent:''},button={disabled:false};let requests=0;
+const context=vm.createContext({Set,JSON,Blob,AbortController,Error,setTimeout,clearTimeout,location:{hash:'#session/TEST'},localStorage:{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)},$:selector=>selector==='#upload-state'?state:button,canUploadSession:()=>true,projectCode:()=>'8PQND4',flatRows:()=>[{session:'TEST',participant:'TEST',experiment:'drive',mode:'formal',created:'',display_rect:'',aoi:'{}',rt:500,correct:1}],uploadTrial:x=>x,recordClass:()=> 'pilot',fetch:async(url,options)=>{requests++;const body=JSON.parse(options.body);assert.equal(body.experiment,'starparcel_drive_v4');assert.equal(body.project,'8PQND4');assert.equal(body.meta.session_id,'TEST');return {ok:true,json:async()=>({ok:true,record_id:'MOCK_ONLY'})};}});
+vm.runInContext(chunk+';globalThis.submit=sendCourse;',context);
+const session={id:'TEST',experiment:'drive',protocol:'starparcel-v4-adaptive-2026-11-03',participant:'TEST',tier:'quick'};
+await context.submit(session);await context.submit(session);assert.equal(requests,1);assert.ok(state.textContent.includes('上传成功'));assert.equal(JSON.parse(data.get('starparcel.upload-status')).TEST.state,'success');
+data.clear();context.fetch=async()=>({ok:false,json:async()=>({ok:false,msg:'mock rejection'})});await context.submit(session);assert.equal(JSON.parse(data.get('starparcel.upload-status')).TEST.state,'failed');assert.ok(state.textContent.includes('上传未确认'));assert.equal(button.disabled,false);
+console.log('PASS adaptive cue threshold/signal/seen safeguards, camera default, auto upload payload, confirmed receipt, duplicate suppression and failure retention (mock network only)');

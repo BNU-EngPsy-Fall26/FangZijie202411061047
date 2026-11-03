@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {canUploadSession,recordClass,uploadTrial} from '../dist/upload-policy.js';
+const existing={mode:'formal',tier:'medium',courseEligible:false,trials:[{rt:543,correct:1}],created:'2026-11-02T08:39:07Z'};
+const before=JSON.stringify(existing);
+assert.equal(canUploadSession(existing),true);
+assert.equal(recordClass(existing),'pilot');
+assert.equal(JSON.stringify(existing),before,'opening upload must not convert or rewrite saved pilot records');
+assert.equal(canUploadSession({mode:'formal',tier:'full',courseEligible:true}),true);
+assert.equal(recordClass({courseEligible:true}),'formal');
+for(const tier of ['medium','full','quick'])assert.equal(canUploadSession({mode:'demo',tier,courseEligible:tier==='full'}),false);
+assert.equal(canUploadSession({mode:'formal',tier:'quick',courseEligible:false}),true);
+const missed={rt:null,correct:0,response:'timeout'};
+assert.deepEqual(uploadTrial(missed),{correct:0,response:'timeout',rt_missing:true});
+assert.equal(missed.rt,null);
+assert.deepEqual(uploadTrial({rt:543,correct:1}),{rt:543,correct:1});
+console.log('PASS: saved medium pilot upload, full upload, demo exclusion and quick pilot upload, record preservation');
